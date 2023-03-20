@@ -1,14 +1,14 @@
-// Number Types mini-challenge 10 10.2
-// Write a function that will only accept numbers and attend to 
-// all TypeScript weakness flags.
-// : number
 
-//NOt using utils.js as import not working - will fix later
 const reviewTotalDisplay = document.querySelector('#reviews')
+const reviewContainer = document.querySelector('.reviews')
+const container = document.querySelector('.container')
 const recommendedProperties = document.querySelector('#propRecom')
 const returningUserDisplay = document.querySelector('#returning-user')
 const userNameDisplay = document.querySelector('#user')
 const footer = document.getElementById('footer')
+const button = document.querySelector('button')
+
+let isLoggedIn: boolean
 
 enum Permission {
     ADMIN = "ADMIN",
@@ -21,10 +21,30 @@ enum LoyaltyUser  {
     BRONZE_USER = 'BRONZE_USER'
 }
 
+interface Review {
+    name: string;
+    stars: number;
+    loyaltyUser: LoyaltyUser;
+    date: string;
+}
+
+interface Property {
+    image: string;
+    title: string;
+    price: Price;
+    location: {
+        firstlineAdd: string;
+        townCity: string;
+        postCode: number | string;
+        country: Country;
+    };
+    contactDetails: [number, string];
+    availToRent: boolean;
+}
 
 function showReviewTotal(value: number, reviewer: string, isLoyalty: LoyaltyUser) {
     const iconDisplay = LoyaltyUser.GOLD_USER ? '⭐' : ''
-    reviewTotalDisplay.innerHTML = 'review total ' + value.toString() + '| last reviewed by ' + reviewer + ' ' + iconDisplay
+    reviewTotalDisplay.innerHTML =  value.toString() + ' ' + "Review" + makeMultiple(value) + '| last reviewed by ' + reviewer + ' ' + iconDisplay
 }
 
 function populateUser(isReturning : boolean, userName: string ) {
@@ -34,15 +54,22 @@ function populateUser(isReturning : boolean, userName: string ) {
     userNameDisplay.innerHTML = userName
 }
 
+
+function makeMultiple(value: number) :string {
+    if (value > 1 || value == 0) {
+        return 's'
+    } else return ''
+}
+
+function getTopTwoReviews(reviews : Review[]) : Review[]  {
+ const sortedReviews = reviews.sort((a, b) => b.stars - a.stars)
+ return sortedReviews.slice(0,2)
+}
+
 //import {showReviewTotal , populateUser} from './utils'
 let isOpen: boolean
 
-const reviews :{
-    name: string;
-    stars: number;
-    loyaltyUser: LoyaltyUser;
-    date: string;
-}[] = [
+const reviews :Review[] = [
     {
         name: 'Sheia',
         stars: 5,
@@ -59,7 +86,7 @@ const reviews :{
         name: 'Omar',
         stars: 4,
         loyaltyUser: LoyaltyUser.SILVER_USER,
-        date: '27-03-2021'
+        date: '27-03-2021',
     },
 ]
 
@@ -72,22 +99,14 @@ const you = {
     stayedAt: ['florida-home', 'oman-flat', 'tokyo-bungalow']
 }
 
-const propObj :{
-    image: string;
-    title: string;
-    price: number;
-    location: {
-        firstlineAdd: string;
-        townCity: string;
-        postCode: number;
-        country: string;
-    };
-    contactDetails: [number, string];
-    availToRent: boolean;
-}[] = [{
+type Price = 45 | 30 | 25 | 35
+type Country = 'Columbia' | 'Italy' | 'Germany' | 'Malasia'
+
+
+const propObj :Property[] = [{
     image: 'images/colombia-property.jpg',
     title: 'Columbian Shack',
-    price: 42,
+    price: 45,
     location: {
         firstlineAdd: 'Shack 37',
         townCity: 'Bogota',
@@ -100,7 +119,7 @@ const propObj :{
 {
     image: 'images/poland-property.jpg',
     title: 'Cabin Italy',
-    price: 56,
+    price: 30,
     location: {
         firstlineAdd: 'Cabin 52',
         townCity: 'Toskana',
@@ -113,7 +132,7 @@ const propObj :{
 {
     image: 'images/london-property.jpg',
     title: 'German Castle',
-    price: 100,
+    price: 25,
     location: {
         firstlineAdd: 'Castle 2',
         townCity: 'Fussen',
@@ -122,22 +141,89 @@ const propObj :{
     },
     contactDetails: [123456789, 'meg@meg.com'],
     availToRent: true,
+},
+{
+    image: 'images/london-property.jpg',
+    title: 'Malia Hotel',
+    price: 35,
+    location: {
+        firstlineAdd: 'Room 4',
+        townCity: 'Malia',
+        postCode: 45334,
+        country: 'Malasia',
+    },
+    contactDetails: [+60349822083, 'lee34@gmail.com'],
+    availToRent: false,
 }]
 
+isLoggedIn = true
+let authorityStatus : any
+
+function showDetails(authorityStatus: boolean | Permission , element : HTMLDivElement, price: number) {
+    if (authorityStatus) {
+        const priceDisplay = document.createElement('div')
+        priceDisplay.innerHTML = price.toString() + '/night'
+        element.appendChild(priceDisplay)
+    }
+ }
+
+ showReviewTotal(reviews.length, reviews[0].name, reviews[0].loyaltyUser)
+populateUser(you.isReturning, you.firstName)
+
  propObj.forEach(item => {
+    console.log(isLoggedIn)
     const card = document.createElement('div')
     card.classList.add('card')
     card.innerHTML = item.title
     const image = document.createElement('img')
     image.setAttribute('src', item.image)
     card.appendChild(image)
+    showDetails(isLoggedIn, card, item.price )
     recommendedProperties.appendChild(card)
 })
 
-showReviewTotal(reviews.length, reviews[0].name, reviews[0].loyaltyUser)
-populateUser(you.isReturning, you.firstName)
+let count = 0
+function addReviews(array: Review[]) : void {
+    if (!count ) {
+        count++
+        const topTwo = getTopTwoReviews(array)
+        for (let i = 0; i < topTwo.length; i++) {
+            const card = document.createElement('div')
+            card.classList.add('review-card')
+            card.innerHTML = topTwo[i].stars + ' stars from ' + topTwo[i].name
+            reviewContainer.appendChild(card)
+        }
+        container.removeChild(button) 
+    }
+}
+
+button.addEventListener('click', () => addReviews(reviews))
 
 let currentLocation: [string, string, number]= ['Germany', '9:15', 8]
 footer.innerHTML = currentLocation[0] + ' ' + currentLocation[1] + ' ' + currentLocation[2] + 'deg'
 
-console.log(currentLocation[0])
+class MainProperty {
+    src: string
+    title: string
+    reviews: Review[]
+    constructor(src : string, title : string, reviews: Review[]){
+        this.src = src
+        this.title = title
+        this.reviews = reviews
+    }
+}
+
+let yourMainProperty = new MainProperty(
+    'images/london-property.jpg', 
+    'London House' , 
+    [{
+        name: "olive",
+        stars: 5,
+        loyaltyUser: LoyaltyUser.GOLD_USER,
+        date: '12-04-2022'
+}])
+
+const mainImageContainer = document.querySelector('.main-image')
+const image = document.createElement('img')
+image.setAttribute('src', yourMainProperty.src)
+mainImageContainer.appendChild(image)
