@@ -7,8 +7,20 @@ var reviewTotalDisplay = document.querySelector('#reviews');
 var recommendedProperties = document.querySelector('#propRecom');
 var returningUserDisplay = document.querySelector('#returning-user');
 var userNameDisplay = document.querySelector('#user');
+var footer = document.getElementById('footer');
+var Permission;
+(function (Permission) {
+    Permission["ADMIN"] = "ADMIN";
+    Permission["READ_ONLY"] = "READ_ONLY";
+})(Permission || (Permission = {}));
+var LoyaltyUser;
+(function (LoyaltyUser) {
+    LoyaltyUser["GOLD_USER"] = "GOLD_USER";
+    LoyaltyUser["SILVER_USER"] = "SILVER_USER";
+    LoyaltyUser["BRONZE_USER"] = "BRONZE_USER";
+})(LoyaltyUser || (LoyaltyUser = {}));
 function showReviewTotal(value, reviewer, isLoyalty) {
-    var iconDisplay = isLoyalty ? '⭐' : '';
+    var iconDisplay = LoyaltyUser.GOLD_USER ? '⭐' : '';
     reviewTotalDisplay.innerHTML = 'review total ' + value.toString() + '| last reviewed by ' + reviewer + ' ' + iconDisplay;
 }
 function populateUser(isReturning, userName) {
@@ -23,25 +35,26 @@ var reviews = [
     {
         name: 'Sheia',
         stars: 5,
-        loyaltyUser: true,
+        loyaltyUser: LoyaltyUser.GOLD_USER,
         date: '01-04-2021'
     },
     {
         name: 'Andrzej',
         stars: 3,
-        loyaltyUser: false,
+        loyaltyUser: LoyaltyUser.BRONZE_USER,
         date: '28-03-2021'
     },
     {
         name: 'Omar',
         stars: 4,
-        loyaltyUser: true,
+        loyaltyUser: LoyaltyUser.SILVER_USER,
         date: '27-03-2021'
     },
 ];
 var you = {
     firstName: 'Bobby',
     lastName: "Hadz",
+    permissions: Permission.ADMIN,
     isReturning: true,
     age: 42,
     stayedAt: ['florida-home', 'oman-flat', 'tokyo-bungalow']
@@ -56,7 +69,7 @@ var propObj = [{
             postCode: 23843,
             country: 'Columbia',
         },
-        contactDetails: 'bob@bob.co.za',
+        contactDetails: [123456789, 'bob@bob.co.za'],
         availToRent: true,
     },
     {
@@ -69,7 +82,7 @@ var propObj = [{
             postCode: 12345,
             country: 'Italy',
         },
-        contactDetails: 'john@john.com',
+        contactDetails: [123456789, 'john@john.com'],
         availToRent: false,
     },
     {
@@ -82,7 +95,7 @@ var propObj = [{
             postCode: 80064,
             country: 'Germany',
         },
-        contactDetails: 'meg@meg.com',
+        contactDetails: [123456789, 'meg@meg.com'],
         availToRent: true,
     }];
 propObj.forEach(function (item) {
@@ -96,3 +109,6 @@ propObj.forEach(function (item) {
 });
 showReviewTotal(reviews.length, reviews[0].name, reviews[0].loyaltyUser);
 populateUser(you.isReturning, you.firstName);
+var currentLocation = ['Germany', '9:15', 8];
+footer.innerHTML = currentLocation[0] + ' ' + currentLocation[1] + ' ' + currentLocation[2] + 'deg';
+console.log(currentLocation[0]);
